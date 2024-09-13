@@ -3,12 +3,17 @@ import numpy as np
 def snr(signal_power, noise_power):
     signal_power = np.nan_to_num(signal_power)
     noise_power = np.nan_to_num(noise_power)
-
-    try:
-        snr = 10*np.log10(signal_power/noise_power)
-    except ZeroDivisionError:
-        snr = 50.0
-    return snr
+    
+    # Conditions
+    valid_condition = (signal_power > 0) & (noise_power > 0)
+    
+    # Compute SNR in dB using vectorized operations
+    snr_values = np.where(valid_condition, 10 * np.log10(signal_power / noise_power), 0)
+    
+    # Ensure all values are finite
+    snr_values = np.where(np.isfinite(snr_values), snr_values, 0)
+    
+    return snr_values
 
 def calculate_snr_per_sample(reconstruction, target):
     """
